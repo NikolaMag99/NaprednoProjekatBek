@@ -1,0 +1,13 @@
+package raf.rs.NwpNikolaDomaci3;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class NwpNikolaDomaci3Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(NwpNikolaDomaci3Application.class, args);
+	}
+
+}
