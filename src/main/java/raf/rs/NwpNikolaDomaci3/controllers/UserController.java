@@ -30,7 +30,7 @@ public class UserController {
     }
 
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public User saveUser(@RequestBody User user, Authentication authentication) {
         Optional<User> u = userService.findById((user.getId()));
         if (u.isPresent()) {
@@ -105,6 +105,7 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+
 
 }
 
