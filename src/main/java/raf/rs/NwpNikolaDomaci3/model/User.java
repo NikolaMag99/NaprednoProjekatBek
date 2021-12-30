@@ -13,11 +13,10 @@ public class User {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column
     private String email;
 
     @Column
@@ -31,14 +30,17 @@ public class User {
     private String pass;
 
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "can_create_user", column = @Column(name = "can_create_user")),
-            @AttributeOverride(name = "can_read_user", column = @Column(name = "can_read_user")),
-            @AttributeOverride(name = "can_update_user", column = @Column(name = "can_update_user")),
-            @AttributeOverride(name = "can_delete_user", column = @Column(name = "can_delete_user"))
-    })
-    private Permission permission;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Permission permissions;
+
+//    @Embedded
+//    @AttributeOverrides({
+//            @AttributeOverride(name = "can_create_user", column = @Column(name = "can_create_user")),
+//            @AttributeOverride(name = "can_read_user", column = @Column(name = "can_read_user")),
+//            @AttributeOverride(name = "can_update_user", column = @Column(name = "can_update_user")),
+//            @AttributeOverride(name = "can_delete_user", column = @Column(name = "can_delete_user"))
+//    })
+//    private Permission permission;
 
     public Long getId() {
         return id;
@@ -80,11 +82,11 @@ public class User {
         this.pass = pass;
     }
 
-    public Permission getPermission() {
-        return permission;
+    public Permission getPermissions() {
+        return permissions;
     }
 
-    public void setPermission(Permission permission) {
-        this.permission = permission;
+    public void setPermissions(Permission permissions) {
+        this.permissions = permissions;
     }
 }

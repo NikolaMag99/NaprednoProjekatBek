@@ -66,23 +66,17 @@ public class UserService implements IService<User, Long>, UserDetailsService {
         this.userRepository.deleteById(id);
 
     }
-
-
-    public User update(User user) {
-        User currUser = this.userRepository.findByEmail(user.getEmail());
-        if (currUser == null) {
-            throw new UsernameNotFoundException("User name " + user.getEmail() + " not found");
-        }
-        if (!(user.getPass().equals(currUser.getPass()))) {
-            user.setPass(user.getPass());
-        }
-        return this.userRepository.save(user);
-    }
-
-
-//    public Page<User> paginate(Integer page, Integer size) {
-//        return this.userRepository.findAll(PageRequest.of(page, size));
+//
+//
+//    public User update(User user) {
+//        User currUser = this.userRepository.findByEmail(user.getEmail());
+//        if (currUser == null) {
+//            throw new UsernameNotFoundException("User name " + user.getEmail() + " not found");
+//        }
+//        if (!(user.getPass().equals(currUser.getPass()))) {
+//            user.setPass(user.getPass());
+//        }
+//        return this.userRepository.save(user);
 //    }
-
 
 }

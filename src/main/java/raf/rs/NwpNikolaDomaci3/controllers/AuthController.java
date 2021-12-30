@@ -31,7 +31,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-            System.out.println(" User je validan! ");
+            System.out.println("OK!");
         } catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.status(401).build();

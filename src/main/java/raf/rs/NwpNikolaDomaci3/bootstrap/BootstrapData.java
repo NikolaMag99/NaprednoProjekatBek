@@ -35,20 +35,19 @@ public class BootstrapData implements CommandLineRunner {
             user.setPass(this.passwordEncoder.encode("user" + i));
 
             Permission permission = new Permission();
-            if(i % 2 != 0){
-                permission.setCan_create_user(1);
-                permission.setCan_delete_user(1);
-                permission.setCan_read_user(1);
-                permission.setCan_update_user(1);
-            }
-            else{
-                permission.setCan_create_user(1);
-                permission.setCan_delete_user(0);
-                permission.setCan_read_user(0);
-                permission.setCan_update_user(1);
+            if (i % 2 != 0) {
+                permission.setCanCreate(true);
+                permission.setCanUpdate(true);
+                permission.setCanDelete(true);
+                permission.setCanRead(true);
+            } else {
+                permission.setCanCreate(true);
+                permission.setCanUpdate(false);
+                permission.setCanDelete(false);
+                permission.setCanRead(true);
             }
 
-            user.setPermission(permission);
+            user.setPermissions(permission);
 
             userRepository.save(user);
 
