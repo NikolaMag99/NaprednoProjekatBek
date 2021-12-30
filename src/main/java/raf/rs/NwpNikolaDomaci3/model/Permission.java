@@ -5,16 +5,10 @@ import lombok.Data;
 import javax.persistence.*;
 
 @Data
-@Entity
-@Table(name = "permissions")
+@Embeddable
 public class Permission {
-
-
-    @Id
-    @Column(name = "permission_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column
-    private String name;
+    private int can_create_user;
+    private int can_read_user;
+    private int can_update_user;
+    private int can_delete_user;
 }

@@ -1,17 +1,23 @@
 package raf.rs.NwpNikolaDomaci3.services;
 
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import java.util.List;
 import java.util.Optional;
 
-public interface IService<T, ID> {
+public interface IService<User, ID> {
 
-    <S extends T> S save(S var1);
+    <S extends User> S save(S id);
 
-    Optional<T> findById(ID var1);
+    Optional<User> findById(ID id);
 
-    List<T> findAll();
+    List<User> findAll();
 
-    void deleteById(ID var1);
+    void deleteById(ID id);
+
+    UserDetails loadUserByUsername(String username)throws UsernameNotFoundException;
+
 
 }

@@ -17,53 +17,54 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService implements IService<User, Long>, UserDetailsService {
 
-    private PasswordEncoder passEncoder;
 
     private UserRepository userRepository;
 
     @Autowired
-    public UserService(PasswordEncoder passEncoder, UserRepository userRepository) {
-        this.passEncoder = passEncoder;
+    public UserService(UserRepository userRepository) {
+
 
         this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User myUser = this.findByEmail(username);
+        User myUser = userRepository.findByEmail(username);
         if (myUser == null) {
             throw new UsernameNotFoundException("User name " + username + " not found");
         }
         return new org.springframework.security.core.userdetails.User(myUser.getEmail(), myUser.getPass(), new ArrayList<>());
     }
 
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return (List<User>) userRepository.findAll();
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email);
+    }
+
     public User create(User user) {
-        user.setPass(this.passEncoder.encode(user.getPass()));
+        user.setPass(user.getPass());
         return this.userRepository.save(user);
     }
 
     public void deleteById(Long id) {
         this.userRepository.deleteById(id);
 
-    }
-
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-
-    public List<User> findAll() {
-        return (List<User>) userRepository.findAll();
-    }
-
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(Long.valueOf(id.longValue()));
-    }
-
-
-    public User findByEmail(String email) {
-        return this.userRepository.findByEmail(email);
     }
 
 
@@ -73,15 +74,15 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("User name " + user.getEmail() + " not found");
         }
         if (!(user.getPass().equals(currUser.getPass()))) {
-            user.setPass(this.passEncoder.encode(user.getPass()));
+            user.setPass(user.getPass());
         }
         return this.userRepository.save(user);
     }
 
 
-    public Page<User> paginate(Integer page, Integer size) {
-        return this.userRepository.findAll(PageRequest.of(page, size));
-    }
+//    public Page<User> paginate(Integer page, Integer size) {
+//        return this.userRepository.findAll(PageRequest.of(page, size));
+//    }
 
 
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import raf.rs.NwpNikolaDomaci3.model.Permission;
 import raf.rs.NwpNikolaDomaci3.model.User;
 import raf.rs.NwpNikolaDomaci3.repositories.UserRepository;
 
@@ -26,15 +27,32 @@ public class BootstrapData implements CommandLineRunner {
 
         System.out.println("Data Loading....");
 
-        User user1 = new User("nikola@gmail.com", this.passwordEncoder.encode("nikola"), "NIKOLA", "PAUN", true, true, true, true);
-        this.userRepository.save(user1);
+        for (int i = 0; i < 5; i++) {
+            User user = new User();
+            user.setEmail("user" + i + "@gmail.com");
+            user.setName("user" + i);
+            user.setLastName("user" + i);
+            user.setPass(this.passwordEncoder.encode("user" + i));
 
-        User user2 = new User("stefan@gmail.com", this.passwordEncoder.encode("stefan"), "STEFAN", "STEFI");
-        this.userRepository.save(user2);
+            Permission permission = new Permission();
+            if(i % 2 != 0){
+                permission.setCan_create_user(1);
+                permission.setCan_delete_user(1);
+                permission.setCan_read_user(1);
+                permission.setCan_update_user(1);
+            }
+            else{
+                permission.setCan_create_user(1);
+                permission.setCan_delete_user(0);
+                permission.setCan_read_user(0);
+                permission.setCan_update_user(1);
+            }
 
-        User user3 = new User("pegaz@gmail.com", this.passwordEncoder.encode("pegaz"), "PEGAZ", "PEGI");
-        this.userRepository.save(user3);
+            user.setPermission(permission);
 
-        System.out.println("Data loaded!");
+            userRepository.save(user);
+
+            System.out.println("Data loaded!");
+        }
     }
 }

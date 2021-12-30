@@ -5,61 +5,86 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.util.HashSet;
-import java.util.Set;
+
 
 @Data
 @Entity
 public class User {
 
 
-
     @Id
-    @Column(name = "user_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+
     private Long id;
 
-    @Column(unique=true)
-    @NotBlank(message = "Email is mandatory")
+    @Column(unique = true)
     private String email;
+
     @Column
-    @NotBlank(message = "Username is mandatory")
     private String name;
+
     @Column
-    @NotBlank(message = "LastName is mandatory")
     private String lastName;
 
     @Column
-    @NotBlank(message = "Password is mandatory")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String pass;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "USERS_PERMISSIONS",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
 
-    private Set<Permission> permissions = new HashSet<>();
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "can_create_user", column = @Column(name = "can_create_user")),
+            @AttributeOverride(name = "can_read_user", column = @Column(name = "can_read_user")),
+            @AttributeOverride(name = "can_update_user", column = @Column(name = "can_update_user")),
+            @AttributeOverride(name = "can_delete_user", column = @Column(name = "can_delete_user"))
+    })
+    private Permission permission;
 
-    public void addPermission(Permission permission) {
-        permissions.add(permission);
-        //permission.getUsers().add(this);
+    public Long getId() {
+        return id;
     }
 
-    public void addPermissions(Set<Permission> permissions) {
-        this.permissions.addAll(permissions);
-//        for(Permission p : permission) {
-//            p.getUsers().add(this);
-//        }
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void removePermission(Permission permission) {
-        permissions.remove(permission);
-        //permission.getUsers().remove(this);
+    public String getEmail() {
+        return email;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    public Permission getPermission() {
+        return permission;
+    }
+
+    public void setPermission(Permission permission) {
+        this.permission = permission;
+    }
 }
