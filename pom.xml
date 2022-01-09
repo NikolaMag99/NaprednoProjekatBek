@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>raf.rs</groupId>
 	<artifactId>NwpNikolaDomaci3 </artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>NwpNikolaDomaci3 </name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
@@ -58,6 +58,18 @@
 			<artifactId>jjwt</artifactId>
 			<version>0.9.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.sipios</groupId>
+			<artifactId>spring-search</artifactId>
+			<version>0.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

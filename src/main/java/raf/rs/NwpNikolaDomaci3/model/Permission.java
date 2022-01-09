@@ -21,8 +21,20 @@ public class Permission {
 
     private boolean canRead;
 
+    private boolean canSearchMachines;
+
+    private boolean canStartMachines;
+
+    private boolean canStopMachines;
+
+    private boolean canRestartMachines;
+
+    private boolean canCreateMachines;
+
+    private boolean canDestroyMachines;
+
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "USER_ID", referencedColumnName = "id")
     @JsonIgnore
     private User user;
 }

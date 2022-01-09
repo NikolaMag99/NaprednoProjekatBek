@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 
 @Data
 @Entity
 public class User {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,14 +33,8 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private Permission permissions;
 
-//    @Embedded
-//    @AttributeOverrides({
-//            @AttributeOverride(name = "can_create_user", column = @Column(name = "can_create_user")),
-//            @AttributeOverride(name = "can_read_user", column = @Column(name = "can_read_user")),
-//            @AttributeOverride(name = "can_update_user", column = @Column(name = "can_update_user")),
-//            @AttributeOverride(name = "can_delete_user", column = @Column(name = "can_delete_user"))
-//    })
-//    private Permission permission;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Machines> machines;
 
     public Long getId() {
         return id;
@@ -88,5 +82,9 @@ public class User {
 
     public void setPermissions(Permission permissions) {
         this.permissions = permissions;
+    }
+
+    public void addMachine(Machines machines) {
+        this.machines.add(machines);
     }
 }

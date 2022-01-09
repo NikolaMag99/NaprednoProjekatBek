@@ -7,17 +7,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
-public interface IService<User, ID> {
+public interface IService<T, ID> {
 
-    <S extends User> S save(S id);
+    <S extends T> S save(S id);
 
-    Optional<User> findById(ID id);
+    Optional<T> findById(ID id);
 
-    List<User> findAll();
+    List<T> findAll();
 
     void deleteById(ID id);
-
-    UserDetails loadUserByUsername(String username)throws UsernameNotFoundException;
-
 
 }
