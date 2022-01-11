@@ -12,6 +12,15 @@ import java.util.List;
 @Entity
 public class User {
 
+
+    public User() {}
+
+    public User(String email, String pass, String name, String lastName) {
+        this.email = email;
+        this.pass = pass;
+        this.name = name;
+        this.lastName = lastName;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

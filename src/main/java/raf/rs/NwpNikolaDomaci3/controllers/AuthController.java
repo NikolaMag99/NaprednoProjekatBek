@@ -12,6 +12,7 @@ import raf.rs.NwpNikolaDomaci3.services.UserService;
 import raf.rs.NwpNikolaDomaci3.utils.JwtUtil;
 
 import java.util.Collection;
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/auth")
@@ -19,6 +20,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtil jwtUtil;
+
 
     public AuthController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
@@ -28,14 +30,15 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
             System.out.println("OK!");
-        } catch (Exception e){
+            System.out.println(userService.findByEmail(loginRequest.getUsername()).getId());
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(loginRequest.getUsername())));
+        return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(loginRequest.getUsername()), userService.findByEmail(loginRequest.getUsername()).getId()));
     }
 }

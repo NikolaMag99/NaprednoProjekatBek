@@ -6,16 +6,12 @@ import lombok.Data;
 public class LoginResponse {
     private String jwt;
 
-    public LoginResponse(String jwt) {
+    private Long id;
+
+    public LoginResponse(String jwt, Long id) {
         this.jwt = jwt;
+        this.id = id;
     }
 
-    public String getJwt() {
-        return jwt;
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
-    }
 
 }

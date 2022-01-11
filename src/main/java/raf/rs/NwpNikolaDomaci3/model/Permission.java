@@ -9,6 +9,26 @@ import javax.persistence.*;
 @Entity
 public class Permission {
 
+
+    public Permission() {
+    }
+
+    public Permission(boolean canCreate, boolean canRead, boolean canUpdate, boolean canDelete,
+                      boolean canSearchMachines, boolean canStartMachines, boolean canStopMachines, boolean canRestartMachines,
+                      boolean canCreateMachines, boolean canDestroyMachines, User user) {
+        this.canCreate = canCreate;
+        this.canRead = canRead;
+        this.canUpdate = canUpdate;
+        this.canDelete = canDelete;
+        this.canSearchMachines = canSearchMachines;
+        this.canStartMachines = canStartMachines;
+        this.canStopMachines = canStopMachines;
+        this.canRestartMachines = canRestartMachines;
+        this.canCreateMachines = canCreateMachines;
+        this.canDestroyMachines = canDestroyMachines;
+        this.user = user;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

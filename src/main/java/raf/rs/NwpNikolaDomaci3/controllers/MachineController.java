@@ -12,6 +12,7 @@ import raf.rs.NwpNikolaDomaci3.model.*;
 import raf.rs.NwpNikolaDomaci3.repositories.ErrorMessRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.MachineRepository;
 import raf.rs.NwpNikolaDomaci3.requests.MachineRequest;
+import raf.rs.NwpNikolaDomaci3.services.ErrorService;
 import raf.rs.NwpNikolaDomaci3.services.MachineService;
 import raf.rs.NwpNikolaDomaci3.services.UserService;
 
@@ -28,6 +29,7 @@ public class MachineController {
 
     private final UserService userService;
     private final MachineService machineService;
+    private final ErrorService errorService;
     private MachineRepository machineRepository;
     private ErrorMessRepository errorMessRepository;
 
@@ -36,10 +38,11 @@ public class MachineController {
     private LocalDate dayBefore = today.minusDays(5);
 
 
-    public MachineController(UserService userService, MachineService machineService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
+    public MachineController(UserService userService, MachineService machineService,ErrorService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
         this.userService = userService;
         this.machineService = machineService;
         this.machineRepository = machineRepository;
+        this.errorService = errorService;
         this.errorMessRepository = errorMessRepository;
     }
 
@@ -70,14 +73,27 @@ public class MachineController {
 
 
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Machines> getAllMachines(@RequestParam("userId") Long id) {
+    public List<Machines> getAllMachinesByUser(@RequestParam("userId") Long id) {
         return machineService.findAllByUserId(id);
+
     }
 
-//    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<?> getAllMachinesById(@RequestParam("machineId") Long id) {
+    @GetMapping(value = "/allMachines", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Machines> getAllMachines() {
+        return machineService.findAll();
+    }
+
+//    @GetMapping(value = "/allErrors", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public List<ErrorMessage> getAllErrors(@RequestParam("machineId") Long id) {
+//        return errorService.findById(id);
+//    }
+
+//    @GetMapping(value = "/allErrors",produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<?> getAllErrors(@RequestParam("machineId") Long id) {
 //        Optional<Machines> optionalMachine = machineService.findById(id);
+//        List<ErrorMessage> listErrorsForMachine = errorService.findAll();
 //        if (optionalMachine.isPresent()) {
+//
 //            return ResponseEntity.ok(optionalMachine.get());
 //        } else {
 //            return ResponseEntity.notFound().build();
@@ -90,10 +106,11 @@ public class MachineController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         List<Machines> list = machineRepository.findAll(Specification.where(specs));
+        List<Machines> listMachinesForUser = machineRepository.findAllByUserId(userLogedIn.get().getId());
         if (userLogedIn.isPresent()) {
             Permission permission = userLogedIn.get().getPermissions();
             if (permission.isCanSearchMachines()) {
-                for (Machines machines : list) {
+                for (Machines machines : listMachinesForUser) {
                     if (machines.isActive()) {
                         returnList.add(machines);
                     }
@@ -232,9 +249,10 @@ public class MachineController {
     }
 
     @PostMapping(value = "/start")
-    public ResponseEntity<?> startMachine(@RequestParam("userId") Long id, Authentication authentication) {
+    public ResponseEntity<?> startMachine(@RequestParam("machineId") Long id, Authentication authentication) {
         Optional<Machines> machineId = machineService.findById(id);
         Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
+//        List<Machines> list = machineRepository.findAllByUserId(id);
         if (permission.isCanStartMachines() && machineId.get().getStatus().equals(MachStatus.STOPPED)) {
             Machines machines = machineId.get();
             machines.setStatus(MachStatus.RUNNING);

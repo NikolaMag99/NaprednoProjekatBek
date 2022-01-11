@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import raf.rs.NwpNikolaDomaci3.model.*;
 import raf.rs.NwpNikolaDomaci3.repositories.ErrorMessRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.MachineRepository;
+import raf.rs.NwpNikolaDomaci3.repositories.UserPermissionsRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.UserRepository;
 
 import java.sql.Date;
@@ -26,6 +27,8 @@ public class BootstrapData implements CommandLineRunner {
 
     private final ErrorMessRepository errorMessRepository;
 
+    private final UserPermissionsRepository userPermissionsRepository;
+
 
     LocalDate today = LocalDate.now();
     LocalDate year = today.plusYears(1);
@@ -35,11 +38,12 @@ public class BootstrapData implements CommandLineRunner {
 
 
     @Autowired
-    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) throws ParseException {
+    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, MachineRepository machineRepository, ErrorMessRepository errorMessRepository,  UserPermissionsRepository userPermissionsRepository) throws ParseException {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.machineRepository = machineRepository;
         this.errorMessRepository = errorMessRepository;
+        this.userPermissionsRepository = userPermissionsRepository;
     }
 
     @Override
@@ -50,6 +54,7 @@ public class BootstrapData implements CommandLineRunner {
         user.setName("user");
         user.setLastName("user");
         user.setPass(this.passwordEncoder.encode("user"));
+        userRepository.save(user);
         permission.setCanCreate(true);
         permission.setCanUpdate(true);
         permission.setCanDelete(true);
@@ -60,6 +65,8 @@ public class BootstrapData implements CommandLineRunner {
         permission.setCanRestartMachines(true);
         permission.setCanSearchMachines(true);
         permission.setCanStopMachines(true);
+        permission.setUser(user);
+        userPermissionsRepository.save(permission);
         user.setPermissions(permission);
         userRepository.save(user);
 
@@ -68,6 +75,7 @@ public class BootstrapData implements CommandLineRunner {
         user2.setName("user2");
         user2.setLastName("user2");
         user2.setPass(this.passwordEncoder.encode("user2"));
+        userRepository.save(user2);
         permission2.setCanCreate(true);
         permission2.setCanUpdate(true);
         permission2.setCanDelete(true);
@@ -78,6 +86,8 @@ public class BootstrapData implements CommandLineRunner {
         permission2.setCanRestartMachines(false);
         permission2.setCanSearchMachines(false);
         permission2.setCanStopMachines(false);
+        permission2.setUser(user2);
+        userPermissionsRepository.save(permission2);
         user2.setPermissions(permission2);
         userRepository.save(user2);
 
