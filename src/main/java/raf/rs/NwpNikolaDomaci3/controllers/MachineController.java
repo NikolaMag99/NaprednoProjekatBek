@@ -111,6 +111,21 @@ public class MachineController {
 //        }
 //    }
 
+    @GetMapping(value = "/read/search",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> searchMachines(
+            @RequestParam(value = "dateFrom", required = false) java.sql.Date dateFrom,
+            @RequestParam(value = "dateTo", required = false) java.sql.Date dateTo,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "status", required = false) List<MachStatus> status,
+            Authentication authentication
+    ) {
+        if ((dateFrom != null && dateTo == null) || (dateFrom == null && dateTo != null)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Must have both dates or none");
+        }
+        return ResponseEntity.ok(machineService.searchByParameters(name, dateFrom, dateTo, status, userService.findByEmail(authentication.getName())));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<Machines>> searchForMachines(@SearchSpec Specification<Machines> specs) {
         List<Machines> returnList = new ArrayList<>();
@@ -280,7 +295,7 @@ public class MachineController {
         try {
             machineService.start(id, userService.findByEmail(authentication.getName()));
             System.out.println("Machine change status from STOPPED TO RUNNING");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         Machines machines = machineId.get();
@@ -320,7 +335,7 @@ public class MachineController {
         try {
             machineService.restart(id, userService.findByEmail(authentication.getName()));
             System.out.println("Machine change status from STOPPED TO RUNNING");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         Machines machines = machineId.get();
