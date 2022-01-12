@@ -32,7 +32,6 @@ public class BootstrapData implements CommandLineRunner {
 
     LocalDate today = LocalDate.now();
     LocalDate year = today.plusYears(1);
-    int i;
     Permission permission = new Permission();
     Permission permission2 = new Permission();
 

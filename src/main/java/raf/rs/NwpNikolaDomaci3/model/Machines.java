@@ -29,7 +29,10 @@ public class Machines {
     @ToString.Exclude
     private User user;
 
-    private boolean active;
+    private Boolean active;
+
+    @Column(nullable = false)
+    private Boolean busy = false;
 
     @Column
     private String name;

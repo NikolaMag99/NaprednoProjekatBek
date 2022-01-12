@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import raf.rs.NwpNikolaDomaci3.model.*;
 import raf.rs.NwpNikolaDomaci3.repositories.ErrorMessRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.MachineRepository;
+import raf.rs.NwpNikolaDomaci3.repositories.UserRepository;
 import raf.rs.NwpNikolaDomaci3.requests.MachineRequest;
 import raf.rs.NwpNikolaDomaci3.services.ErrorService;
 import raf.rs.NwpNikolaDomaci3.services.MachineService;
@@ -21,6 +22,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/api/machines/")
@@ -28,6 +31,7 @@ public class MachineController {
 
 
     private final UserService userService;
+    private final UserRepository userRepository;
     private final MachineService machineService;
     private final ErrorService errorService;
     private MachineRepository machineRepository;
@@ -38,8 +42,9 @@ public class MachineController {
     private LocalDate dayBefore = today.minusDays(5);
 
 
-    public MachineController(UserService userService, MachineService machineService,ErrorService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
+    public MachineController(UserService userService, UserRepository userRepository, MachineService machineService, ErrorService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
         this.machineService = machineService;
         this.machineRepository = machineRepository;
         this.errorService = errorService;
@@ -49,7 +54,7 @@ public class MachineController {
 
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Machines saveMachine(@RequestBody MachineRequest machines, Authentication authentication) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         if (userLogedIn.isPresent()) {
             Permission permission = userLogedIn.get().getPermissions();
@@ -69,6 +74,12 @@ public class MachineController {
             }
         }
         return null;
+    }
+
+    private User getCurrentUser() {
+        User userDetails =
+                (User) getContext().getAuthentication().getPrincipal();
+        return userRepository.findByEmail(userDetails.getEmail());
     }
 
 
@@ -103,7 +114,7 @@ public class MachineController {
     @GetMapping("/search")
     public ResponseEntity<List<Machines>> searchForMachines(@SearchSpec Specification<Machines> specs) {
         List<Machines> returnList = new ArrayList<>();
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         List<Machines> list = machineRepository.findAll(Specification.where(specs));
         List<Machines> listMachinesForUser = machineRepository.findAllByUserId(userLogedIn.get().getId());
@@ -111,7 +122,7 @@ public class MachineController {
             Permission permission = userLogedIn.get().getPermissions();
             if (permission.isCanSearchMachines()) {
                 for (Machines machines : listMachinesForUser) {
-                    if (machines.isActive()) {
+                    if (machines.getActive()) {
                         returnList.add(machines);
                     }
                 }
@@ -127,7 +138,7 @@ public class MachineController {
     @GetMapping("/search/date")
     public ResponseEntity<List<Machines>> searchForMachinesByDate(@RequestParam("dateFrom") String dateFrom, @RequestParam("dateTo") String dateTo) {
         List<Machines> returnList = new ArrayList<>();
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         if (userLogedIn.isPresent()) {
             List<Machines> list = machineService.findAll();
@@ -154,7 +165,7 @@ public class MachineController {
     @GetMapping("/search/dateFrom")
     public ResponseEntity<List<Machines>> searchForMachinesByDateFrom(@RequestParam("dateFrom") String dateFrom) {
         List<Machines> returnList = new ArrayList<>();
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         if (userLogedIn.isPresent()) {
             List<Machines> list = machineService.findAll();
@@ -180,7 +191,7 @@ public class MachineController {
     @GetMapping("/search/dateTo")
     public ResponseEntity<List<Machines>> searchForMachinesByDateTo(@RequestParam("dateTo") String dateTo) {
         List<Machines> returnList = new ArrayList<>();
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         if (userLogedIn.isPresent()) {
             List<Machines> list = machineService.findAll();
@@ -206,7 +217,7 @@ public class MachineController {
     @GetMapping("/search/status/{status}")
     public ResponseEntity<List<Machines>> searchForMachinesByStatus(@PathVariable String status) {
         List<Machines> returnList = new ArrayList<>();
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = getContext().getAuthentication().getName();
         Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
         if (userLogedIn.isPresent()) {
             List<Machines> list = machineService.findAll();
@@ -248,76 +259,73 @@ public class MachineController {
         return ResponseEntity.status(403).build();
     }
 
+//    @PostMapping(value = "/schedule")
+//    public ResponseEntity<?> scheduleAction(@RequestParam("scheduledTime") java.sql.Date scheduledTime,
+//                                            @RequestParam("machineId") Long id,
+//                                            @RequestParam("operation") MachineOperation operation,
+//                                            Authentication authentication) {
+////        Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
+////        User currentUser = getCurrentUser();
+//        Optional<Machines> optionalMachine = machineService.findById(id);
+//        if (optionalMachine.isPresent()) {
+//            machineService.schedule(id, scheduledTime, operation, userService.findByEmail(authentication.getName()));
+//            return ResponseEntity.status(HttpStatus.OK).build();
+//        }
+//        return ResponseEntity.notFound().build();
+//    }
+
     @PostMapping(value = "/start")
     public ResponseEntity<?> startMachine(@RequestParam("machineId") Long id, Authentication authentication) {
         Optional<Machines> machineId = machineService.findById(id);
-        Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
-//        List<Machines> list = machineRepository.findAllByUserId(id);
-        if (permission.isCanStartMachines() && machineId.get().getStatus().equals(MachStatus.STOPPED)) {
-            Machines machines = machineId.get();
-            machines.setStatus(MachStatus.RUNNING);
-            machineService.save(machines);
+        try {
+            machineService.start(id, userService.findByEmail(authentication.getName()));
             System.out.println("Machine change status from STOPPED TO RUNNING");
-            return ResponseEntity.ok().build();
-        } else {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setDate(new Date(Calendar.getInstance().getTime().getTime()));
-            errorMessage.setOperation(MachineOperation.START);
-            System.out.println("You dont have permission to start machines!");
-            errorMessage.setMessage("You dont have permission to start machines!");
-            errorMessage.setMachines(machineId.get());
-            errorMessRepository.save(errorMessage);
-            return ResponseEntity.status(403).build();
+        } catch (Exception e){
+            e.printStackTrace();
         }
+        Machines machines = machineId.get();
+        machines.setBusy(true);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/stop")
-    public ResponseEntity<?> stopMachine(@RequestParam("userId") Long id, Authentication authentication) {
+    public ResponseEntity<?> stopMachine(@RequestParam("machineId") Long id, Authentication authentication) {
         Optional<Machines> machineId = machineService.findById(id);
         Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
-        if (permission.isCanStopMachines() && machineId.get().getStatus().equals(MachStatus.RUNNING)) {
-            Machines machines = machineId.get();
-            machines.setStatus(MachStatus.STOPPED);
-            machineService.save(machines);
+        try {
+//            if (permission.isCanStopMachines() && machineId.get().getStatus().equals(MachStatus.RUNNING)) {
+            machineService.stop(id, userService.findByEmail(authentication.getName()));
             System.out.println("Machine change status from RUNNING TO STOPPED");
-            return ResponseEntity.ok().build();
-        } else {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setDate(new Date(Calendar.getInstance().getTime().getTime()));
-            errorMessage.setOperation(MachineOperation.STOP);
-            System.out.println("You dont have permission to stop machines!");
-            errorMessage.setMessage("You dont have permission to stop machines!");
-            errorMessage.setMachines(machineId.get());
-            errorMessRepository.save(errorMessage);
-            return ResponseEntity.status(403).build();
+//            } else {
+//                ErrorMessage errorMessage = new ErrorMessage();
+//                errorMessage.setDate(new Date(Calendar.getInstance().getTime().getTime()));
+//                errorMessage.setOperation(MachineOperation.STOP);
+//                System.out.println("You dont have permission to stop machines!");
+//                errorMessage.setMessage("You dont have permission to stop machines!");
+//                errorMessage.setMachines(machineId.get());
+//                errorMessRepository.save(errorMessage);
+//            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        Machines machines = machineId.get();
+        machines.setBusy(true);
+        return ResponseEntity.ok().build();
+
     }
 
     @PostMapping(value = "/restart")
-    public ResponseEntity<?> restartMachine(@RequestParam("userId") Long id, Authentication authentication) throws InterruptedException {
+    public ResponseEntity<?> restartMachine(@RequestParam("machineId") Long id, Authentication authentication) throws InterruptedException {
         Optional<Machines> machineId = machineService.findById(id);
-        Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
-        if (permission.isCanDestroyMachines() && machineId.get().getStatus().equals(MachStatus.RUNNING)) {
-            Machines machines = machineId.get();
-            machines.setStatus(MachStatus.STOPPED);
-            machineService.save(machines);
-            System.out.println("Machine status before sleep");
-            System.out.println(machines.getStatus());
-            machines.setStatus(MachStatus.RUNNING);
-            machineService.save(machines);
-            System.out.println("Machine status after 5 sec");
-            System.out.println(machines.getStatus());
-            return ResponseEntity.ok().build();
-        } else {
-            ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setDate(new Date(Calendar.getInstance().getTime().getTime()));
-            errorMessage.setOperation(MachineOperation.RESTART);
-            System.out.println("You dont have permission to restart machines!");
-            errorMessage.setMessage("You dont have permission to restart machines!");
-            errorMessage.setMachines(machineId.get());
-            errorMessRepository.save(errorMessage);
-            return ResponseEntity.status(403).build();
+        try {
+            machineService.restart(id, userService.findByEmail(authentication.getName()));
+            System.out.println("Machine change status from STOPPED TO RUNNING");
+        } catch (Exception e){
+            e.printStackTrace();
         }
+        Machines machines = machineId.get();
+        machines.setBusy(true);
+        return ResponseEntity.ok().build();
     }
 
 }
