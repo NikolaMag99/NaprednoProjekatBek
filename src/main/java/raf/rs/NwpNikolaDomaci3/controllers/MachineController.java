@@ -6,18 +6,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import raf.rs.NwpNikolaDomaci3.model.*;
 import raf.rs.NwpNikolaDomaci3.repositories.ErrorMessRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.MachineRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.UserRepository;
 import raf.rs.NwpNikolaDomaci3.requests.MachineRequest;
-import raf.rs.NwpNikolaDomaci3.services.ErrorService;
+import raf.rs.NwpNikolaDomaci3.services.ErrorMessageService;
 import raf.rs.NwpNikolaDomaci3.services.MachineService;
 import raf.rs.NwpNikolaDomaci3.services.UserService;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -33,7 +31,7 @@ public class MachineController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final MachineService machineService;
-    private final ErrorService errorService;
+    private final ErrorMessageService errorService;
     private MachineRepository machineRepository;
     private ErrorMessRepository errorMessRepository;
 
@@ -42,7 +40,7 @@ public class MachineController {
     private LocalDate dayBefore = today.minusDays(5);
 
 
-    public MachineController(UserService userService, UserRepository userRepository, MachineService machineService, ErrorService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
+    public MachineController(UserService userService, UserRepository userRepository, MachineService machineService, ErrorMessageService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.machineService = machineService;
@@ -94,22 +92,10 @@ public class MachineController {
         return machineService.findAll();
     }
 
-//    @GetMapping(value = "/allErrors", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public List<ErrorMessage> getAllErrors(@RequestParam("machineId") Long id) {
-//        return errorService.findById(id);
-//    }
-
-//    @GetMapping(value = "/allErrors",produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<?> getAllErrors(@RequestParam("machineId") Long id) {
-//        Optional<Machines> optionalMachine = machineService.findById(id);
-//        List<ErrorMessage> listErrorsForMachine = errorService.findAll();
-//        if (optionalMachine.isPresent()) {
-//
-//            return ResponseEntity.ok(optionalMachine.get());
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
+    @GetMapping(value = "/allErrors", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ErrorMessage> getAllErrors(Authentication authentication) {
+        return errorService.findErrorMessagesForUser(userService.findByEmail(authentication.getName()));
+    }
 
     @GetMapping(value = "/read/search",
             produces = MediaType.APPLICATION_JSON_VALUE)
