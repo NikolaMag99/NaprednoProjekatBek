@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import raf.rs.NwpNikolaDomaci3.model.*;
 import raf.rs.NwpNikolaDomaci3.repositories.ErrorMessRepository;
 import raf.rs.NwpNikolaDomaci3.repositories.MachineRepository;
@@ -70,11 +71,11 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
 //        return machineRepository.findMachineByMachineId(id, user);
 //    }
 
-//    @Override
-//    public List<Machines> searchByParameters(String name, Date dateFrom, Date dateTo, List<MachStatus> status, User user) {
-//        return machineRepository.findMachinesByParameters(name, dateFrom, dateTo, status, CollectionUtils.isEmpty(status), user);
-//    }
 
+    @Override
+    public List<Machines> searchByParameters(String name, java.sql.Date dateFrom, java.sql.Date dateTo, List<MachStatus> status, User user) {
+        return machineRepository.findMachinesByParameters(name, dateFrom, dateTo, status, CollectionUtils.isEmpty(status), user);
+    }
 
     @Override
     public void start(Long id, User user) throws Exception {

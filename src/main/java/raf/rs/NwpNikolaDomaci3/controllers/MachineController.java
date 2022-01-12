@@ -259,20 +259,20 @@ public class MachineController {
         return ResponseEntity.status(403).build();
     }
 
-//    @PostMapping(value = "/schedule")
-//    public ResponseEntity<?> scheduleAction(@RequestParam("scheduledTime") java.sql.Date scheduledTime,
-//                                            @RequestParam("machineId") Long id,
-//                                            @RequestParam("operation") MachineOperation operation,
-//                                            Authentication authentication) {
-////        Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
-////        User currentUser = getCurrentUser();
-//        Optional<Machines> optionalMachine = machineService.findById(id);
-//        if (optionalMachine.isPresent()) {
-//            machineService.schedule(id, scheduledTime, operation, userService.findByEmail(authentication.getName()));
-//            return ResponseEntity.status(HttpStatus.OK).build();
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
+    @PostMapping(value = "/schedule")
+    public ResponseEntity<?> scheduleAction(@RequestParam("scheduledTime") java.sql.Date scheduledTime,
+                                            @RequestParam("machineId") Long id,
+                                            @RequestParam("operation") MachineOperation operation,
+                                            Authentication authentication) {
+//        Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
+//        User currentUser = getCurrentUser();
+        Optional<Machines> optionalMachine = machineService.findById(id);
+        if (optionalMachine.isPresent()) {
+            machineService.schedule(id, scheduledTime, operation, userService.findByEmail(authentication.getName()));
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 
     @PostMapping(value = "/start")
     public ResponseEntity<?> startMachine(@RequestParam("machineId") Long id, Authentication authentication) {

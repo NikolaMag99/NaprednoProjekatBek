@@ -5,7 +5,7 @@ import raf.rs.NwpNikolaDomaci3.model.MachineOperation;
 import raf.rs.NwpNikolaDomaci3.model.Machines;
 import raf.rs.NwpNikolaDomaci3.model.User;
 
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ public interface MachineServiceInterface {
 
 //    Optional<Machines> findByIdUser(Long id, User user);
 
-//    List<Machines> searchByParameters(String name, Date dateFrom, Date dateTo, List<MachStatus> status, User user);
+    List<Machines> searchByParameters(String name, Date dateFrom, Date dateTo, List<MachStatus> status, User user);
 
     void start(Long id, User user) throws Exception;
 
