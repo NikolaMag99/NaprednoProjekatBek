@@ -22,5 +22,5 @@ public interface MachineServiceInterface {
 
     void restart(Long id, User user) throws Exception;
 
-//    void schedule(Long id, java.sql.Date scheduleAt, MachineOperation action, User user);
+    void schedule(Long id, java.sql.Date scheduleAt, MachineOperation action, User user);
 }

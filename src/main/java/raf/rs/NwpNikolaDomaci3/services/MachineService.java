@@ -2,7 +2,11 @@ package raf.rs.NwpNikolaDomaci3.services;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import raf.rs.NwpNikolaDomaci3.model.*;
 import raf.rs.NwpNikolaDomaci3.repositories.ErrorMessRepository;
@@ -19,15 +23,15 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     private ErrorMessRepository errorMessRepository;
 
 
-//    private final TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
 
     @Autowired
-    public MachineService(MachineRepository machineRepository) {
+    public MachineService(MachineRepository machineRepository, TaskScheduler taskScheduler, ErrorMessRepository errorMessRepository) {
 
 
         this.machineRepository = machineRepository;
-//        this.errorMessRepository = errorMessRepository;
-//        this.taskScheduler = taskScheduler;
+        this.taskScheduler = taskScheduler;
+        this.errorMessRepository = errorMessRepository;
     }
 
 
@@ -143,34 +147,34 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
         }
     }
 
-    //    @Override
-//    public void schedule(Long id, java.sql.Date scheduleAt, MachineOperation operation, User user) {
-//        this.taskScheduler.schedule(() -> {
-//            try {
-//                System.out.println(operation.name());
-//                switch (operation) {
-//                    case STOP:
-//                        this.stop(id, user);
-//                        break;
-//                    case START:
-//                        this.start(id, user);
-//                        break;
-//                    case RESTART:
-//                        this.restart(id, user);
-//                        break;
-//                    default:
-//                        throw new Exception();
-//                }
-//            } catch (Exception e) {
-//                ErrorMessage errorMessage = new ErrorMessage();
-//                errorMessage.setMessage(e.getMessage());
-//                errorMessage.setOperation(operation);
-//                errorMessage.setMachines(findById(id).orElse(null));
-//                errorMessage.setDate(scheduleAt);
-//                errorMessRepository.save(errorMessage);
-//            }
-//        }, scheduleAt);
-//    }
+    @Override
+    public void schedule(Long id, java.sql.Date scheduleAt, MachineOperation operation, User user) {
+        this.taskScheduler.schedule(() -> {
+            try {
+                switch (operation) {
+                    case STOP:
+                        this.stop(id, user);
+                        break;
+                    case START:
+                        this.start(id, user);
+                        break;
+                    case RESTART:
+                        this.restart(id, user);
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                ErrorMessage errorMessage = new ErrorMessage();
+                errorMessage.setMessage(e.getMessage());
+                errorMessage.setOperation(operation);
+                errorMessage.setMachines(findById(id).orElse(null));
+                errorMessage.setDate(scheduleAt);
+                errorMessRepository.save(errorMessage);
+            }
+        }, scheduleAt);
+    }
     private Machines findAndCheckMachine(Long id, User user) throws Exception {
         Machines machine = machineRepository.findById(id).orElse(null);
         if (machine == null) {
