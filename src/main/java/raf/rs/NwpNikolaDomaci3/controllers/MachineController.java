@@ -280,7 +280,6 @@ public class MachineController {
         Optional<Machines> machineId = machineService.findById(id);
         try {
             machineService.start(id, userService.findByEmail(authentication.getName()));
-            System.out.println("Machine change status from STOPPED TO RUNNING");
         } catch (Exception e) {
             e.printStackTrace();
         }

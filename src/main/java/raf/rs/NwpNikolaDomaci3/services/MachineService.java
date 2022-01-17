@@ -2,11 +2,8 @@ package raf.rs.NwpNikolaDomaci3.services;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import raf.rs.NwpNikolaDomaci3.model.*;
@@ -80,13 +77,13 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     @Override
     public void start(Long id, User user) throws Exception {
         Permission permission = user.getPermissions();
-        Machines machines = findAndCheckMachine(id, user);
+        Machines machines = checkMachine(id, user);
         if (permission.isCanStartMachines() && machines.getStatus().equals(MachStatus.STOPPED)) {
             machines.setBusy(true);
             machines = machineRepository.save(machines);
             Thread.sleep(10000);
             machines.setStatus(MachStatus.RUNNING);
-            machines.setActive(false);
+            machines.setBusy(false);
             machineRepository.save(machines);
         } else {
             ErrorMessage errorMessage = new ErrorMessage();
@@ -103,13 +100,13 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     @Async
     public void stop(Long id, User user) throws Exception {
         Permission permission = user.getPermissions();
-        Machines machines = findAndCheckMachine(id, user);
+        Machines machines = checkMachine(id, user);
         if (permission.isCanStopMachines() && machines.getStatus().equals(MachStatus.RUNNING)) {
             machines.setBusy(true);
             machines = machineRepository.save(machines);
             Thread.sleep(10000);
             machines.setStatus(MachStatus.STOPPED);
-            machines.setActive(false);
+            machines.setBusy(false);
             machineRepository.save(machines);
         } else {
             ErrorMessage errorMessage = new ErrorMessage();
@@ -125,7 +122,7 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     @Override
     public void restart(Long id, User user) throws Exception {
         Permission permission = user.getPermissions();
-        Machines machines = findAndCheckMachine(id, user);
+        Machines machines = checkMachine(id, user);
         if (permission.isCanRestartMachines() && machines.getStatus().equals(MachStatus.RUNNING)) {
 
             machines.setBusy(true);
@@ -134,7 +131,7 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
             machines.setStatus(MachStatus.STOPPED);
             machines = machineRepository.save(machines);
             Thread.sleep(5000);
-            machines.setActive(false);
+            machines.setBusy(false);
             machines.setStatus(MachStatus.RUNNING);
             machineRepository.save(machines);
         } else {
@@ -176,16 +173,16 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
             }
         }, scheduleAt);
     }
-    private Machines findAndCheckMachine(Long id, User user) throws Exception {
+    private Machines checkMachine(Long id, User user) throws Exception {
         Machines machine = machineRepository.findById(id).orElse(null);
-        if (machine == null) {
-            System.out.println("Masina nije pronadjena");
-        }
         if (machine.getBusy()) {
             System.out.println("Masina je zauzeta");
         }
         if (!Objects.equals(user.getId(), machine.getUser().getId())) {
             System.out.println("Nije isti user");
+        }
+        if (machine == null) {
+            System.out.println("Masina nije pronadjena");
         }
         return machine;
     }
