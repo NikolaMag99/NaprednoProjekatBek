@@ -83,8 +83,14 @@ public class MachineController {
 
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Machines> getAllMachinesByUser(@RequestParam("userId") Long id) {
-        return machineService.findAllByUserId(id);
-
+        List<Machines> list = machineService.findAllByUserId(id);
+        List<Machines> machinesList = new ArrayList();
+        for (Machines m : list) {
+            if (m.getActive()) {
+                machinesList.add(m);
+            }
+        }
+        return machinesList;
     }
 
     @GetMapping(value = "/allMachines", produces = MediaType.APPLICATION_JSON_VALUE)

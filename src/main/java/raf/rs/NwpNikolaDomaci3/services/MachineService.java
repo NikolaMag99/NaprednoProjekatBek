@@ -2,6 +2,7 @@ package raf.rs.NwpNikolaDomaci3.services;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -75,6 +76,7 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     }
 
     @Override
+    @Async
     public void start(Long id, User user) throws Exception {
         Permission permission = user.getPermissions();
         Machines machines = checkMachine(id, user);
@@ -120,11 +122,11 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     }
 
     @Override
+    @Async
     public void restart(Long id, User user) throws Exception {
         Permission permission = user.getPermissions();
         Machines machines = checkMachine(id, user);
         if (permission.isCanRestartMachines() && machines.getStatus().equals(MachStatus.RUNNING)) {
-
             machines.setBusy(true);
             machines = machineRepository.save(machines);
             Thread.sleep(5000);
@@ -146,6 +148,7 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     }
 
     @Override
+    @Async
     public void schedule(Long id, java.sql.Date scheduleAt, MachineOperation operation, User user) {
         this.taskScheduler.schedule(() -> {
             try {
@@ -177,12 +180,11 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
         Machines machine = machineRepository.findById(id).orElse(null);
         if (machine.getBusy()) {
             System.out.println("Masina je zauzeta");
+            ResponseEntity.status(403).build();
         }
         if (!Objects.equals(user.getId(), machine.getUser().getId())) {
             System.out.println("Nije isti user");
-        }
-        if (machine == null) {
-            System.out.println("Masina nije pronadjena");
+            ResponseEntity.status(403).build();
         }
         return machine;
     }

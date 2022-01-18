@@ -34,7 +34,7 @@ public class Machines {
     @Column(nullable = false)
     private Boolean busy = false;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
     private LocalDate dateFrom;
