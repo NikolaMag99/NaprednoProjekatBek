@@ -21,7 +21,6 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
 
     private ErrorMessRepository errorMessRepository;
 
-
     private final TaskScheduler taskScheduler;
 
     @Autowired
@@ -63,11 +62,6 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
         this.machineRepository.deleteById(id);
 
     }
-
-//    @Override
-//    public Optional<Machines> findByIdUser(Long id, User user) {
-//        return machineRepository.findMachineByMachineId(id, user);
-//    }
 
 
     @Override
@@ -126,7 +120,8 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
     public void restart(Long id, User user) throws Exception {
         Permission permission = user.getPermissions();
         Machines machines = checkMachine(id, user);
-        if (permission.isCanRestartMachines() && machines.getStatus().equals(MachStatus.RUNNING)) {
+        Optional<Machines> machine = machineRepository.findById(id);
+        if (permission.isCanRestartMachines() && machines.getStatus().equals(MachStatus.RUNNING) && !machine.get().getBusy()) {
             machines.setBusy(true);
             machines = machineRepository.save(machines);
             Thread.sleep(5000);
@@ -176,6 +171,7 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
             }
         }, scheduleAt);
     }
+
     private Machines checkMachine(Long id, User user) throws Exception {
         Machines machine = machineRepository.findById(id).orElse(null);
         if (machine.getBusy()) {
