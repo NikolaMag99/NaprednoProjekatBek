@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 
+
 @Component
 public class BootstrapData implements CommandLineRunner {
 
@@ -34,6 +35,9 @@ public class BootstrapData implements CommandLineRunner {
     LocalDate year = today.plusYears(1);
     Permission permission = new Permission();
     Permission permission2 = new Permission();
+    java.sql.Date logicalDate;
+    Calendar c = Calendar.getInstance();
+
 
 
     @Autowired
@@ -82,9 +86,9 @@ public class BootstrapData implements CommandLineRunner {
         permission2.setCanStartMachines(true);
         permission2.setCanCreateMachines(true);
         permission2.setCanDestroyMachines(false);
-        permission2.setCanRestartMachines(false);
-        permission2.setCanSearchMachines(false);
-        permission2.setCanStopMachines(false);
+        permission2.setCanRestartMachines(true);
+        permission2.setCanSearchMachines(true);
+        permission2.setCanStopMachines(true);
         permission2.setUser(user2);
         userPermissionsRepository.save(permission2);
         user2.setPermissions(permission2);
@@ -94,8 +98,8 @@ public class BootstrapData implements CommandLineRunner {
         Machines machines = new Machines();
         machines.setStatus(MachStatus.RUNNING);
         machines.setName("Masina 1");
-        machines.setDateFrom(today);
-        machines.setDateTo(year);
+        machines.setDateFrom(new Date(Calendar.getInstance().getTime().getTime()));
+        machines.setDateTo(new java.sql.Date(c.getTimeInMillis()));
         machines.setActive(true);
         machines.setUser(user);
         machineRepository.save(machines);
@@ -103,8 +107,8 @@ public class BootstrapData implements CommandLineRunner {
         Machines machines2 = new Machines();
         machines2.setStatus(MachStatus.STOPPED);
         machines2.setName("Masina 2");
-        machines2.setDateFrom(today);
-        machines2.setDateTo(year);
+        machines2.setDateFrom(new Date(Calendar.getInstance().getTime().getTime()));
+        machines2.setDateTo(new java.sql.Date(c.getTimeInMillis()));
         machines2.setActive(true);
         machines2.setUser(user2);
         machineRepository.save(machines2);

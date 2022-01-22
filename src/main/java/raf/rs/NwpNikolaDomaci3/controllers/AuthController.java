@@ -14,7 +14,7 @@ import raf.rs.NwpNikolaDomaci3.utils.JwtUtil;
 import java.util.Collection;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;

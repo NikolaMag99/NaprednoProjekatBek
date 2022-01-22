@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -37,9 +37,9 @@ public class Machines {
     @Column(nullable = false)
     private String name;
 
-    private LocalDate dateFrom;
+    private java.sql.Date dateFrom;
 
-    private LocalDate dateTo;
+    private java.sql.Date dateTo;
 
     @OneToMany(mappedBy = "machines", cascade =  CascadeType.ALL)
     @ToString.Exclude

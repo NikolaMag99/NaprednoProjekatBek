@@ -16,6 +16,7 @@ import raf.rs.NwpNikolaDomaci3.services.ErrorMessageService;
 import raf.rs.NwpNikolaDomaci3.services.MachineService;
 import raf.rs.NwpNikolaDomaci3.services.UserService;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -38,6 +39,8 @@ public class MachineController {
     LocalDate today = LocalDate.now();
     private LocalDate yearFromNow = today.plusYears(1);
     private LocalDate dayBefore = today.minusDays(5);
+    Calendar c = Calendar.getInstance();
+
 
 
     public MachineController(UserService userService, UserRepository userRepository, MachineService machineService, ErrorMessageService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
@@ -62,8 +65,8 @@ public class MachineController {
                 machine.setStatus(MachStatus.STOPPED);
                 machine.setUser(userLogedIn.get());
                 machine.setName(machines.getName());
-                machine.setDateFrom(dayBefore);
-                machine.setDateTo(yearFromNow);
+                machine.setDateFrom(new Date(Calendar.getInstance().getTime().getTime()));
+                machine.setDateTo(new java.sql.Date(c.getTimeInMillis()));
                 userLogedIn.get().addMachine(machine);
                 System.out.println("You have create machine!");
                 return machineService.save(machine);
@@ -103,7 +106,7 @@ public class MachineController {
         return errorService.findErrorMessagesForUser(userService.findByEmail(authentication.getName()));
     }
 
-    @GetMapping(value = "/read/search",
+    @GetMapping(value = "/search",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchMachines(
             @RequestParam(value = "dateFrom", required = false) java.sql.Date dateFrom,
@@ -112,144 +115,146 @@ public class MachineController {
             @RequestParam(value = "status", required = false) List<MachStatus> status,
             Authentication authentication
     ) {
+        System.out.println(dateFrom);
+        System.out.println(name);
         if ((dateFrom != null && dateTo == null) || (dateFrom == null && dateTo != null)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Must have both dates or none");
         }
         return ResponseEntity.ok(machineService.searchByParameters(name, dateFrom, dateTo, status, userService.findByEmail(authentication.getName())));
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Machines>> searchForMachines(@SearchSpec Specification<Machines> specs) {
-        List<Machines> returnList = new ArrayList<>();
-        String username = getContext().getAuthentication().getName();
-        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
-        List<Machines> list = machineRepository.findAll(Specification.where(specs));
-        List<Machines> listMachinesForUser = machineRepository.findAllByUserId(userLogedIn.get().getId());
-        if (userLogedIn.isPresent()) {
-            Permission permission = userLogedIn.get().getPermissions();
-            if (permission.isCanSearchMachines()) {
-                for (Machines machines : listMachinesForUser) {
-                    if (machines.getActive()) {
-                        returnList.add(machines);
-                    }
-                }
-            }
-        }
-        if (returnList.isEmpty()) {
-            System.out.println("No machines");
-            return ResponseEntity.status(403).build();
-        }
-        return new ResponseEntity<>(returnList, HttpStatus.OK);
-    }
+//    @GetMapping("/read/search")
+//    public ResponseEntity<List<Machines>> searchForMachines(@SearchSpec Specification<Machines> specs) {
+//        List<Machines> returnList = new ArrayList<>();
+//        String username = getContext().getAuthentication().getName();
+//        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
+//        List<Machines> list = machineRepository.findAll(Specification.where(specs));
+//        List<Machines> listMachinesForUser = machineRepository.findAllByUserId(userLogedIn.get().getId());
+//        if (userLogedIn.isPresent()) {
+//            Permission permission = userLogedIn.get().getPermissions();
+//            if (permission.isCanSearchMachines()) {
+//                for (Machines machines : listMachinesForUser) {
+//                    if (machines.getActive()) {
+//                        returnList.add(machines);
+//                    }
+//                }
+//            }
+//        }
+//        if (returnList.isEmpty()) {
+//            System.out.println("No machines");
+//            return ResponseEntity.status(403).build();
+//        }
+//        return new ResponseEntity<>(returnList, HttpStatus.OK);
+//    }
 
-    @GetMapping("/search/date")
-    public ResponseEntity<List<Machines>> searchForMachinesByDate(@RequestParam("dateFrom") String dateFrom, @RequestParam("dateTo") String dateTo) {
-        List<Machines> returnList = new ArrayList<>();
-        String username = getContext().getAuthentication().getName();
-        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
-        if (userLogedIn.isPresent()) {
-            List<Machines> list = machineService.findAll();
-            Permission permission = userLogedIn.get().getPermissions();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate fromDate = LocalDate.parse(dateFrom, formatter);
-            LocalDate toDate = LocalDate.parse(dateTo, formatter);
-            if (permission.isCanSearchMachines()) {
-                for (Machines machines : list) {
-                    if (machines.getDateFrom().isAfter(fromDate) && machines.getDateFrom().isBefore(toDate)) {
-                        returnList.add(machines);
-                    }
-                }
-            }
-        }
+//    @GetMapping("/search/date")
+//    public ResponseEntity<List<Machines>> searchForMachinesByDate(@RequestParam("dateFrom") String dateFrom, @RequestParam("dateTo") String dateTo) {
+//        List<Machines> returnList = new ArrayList<>();
+//        String username = getContext().getAuthentication().getName();
+//        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
+//        if (userLogedIn.isPresent()) {
+//            List<Machines> list = machineService.findAll();
+//            Permission permission = userLogedIn.get().getPermissions();
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//            LocalDate fromDate = LocalDate.parse(dateFrom, formatter);
+//            LocalDate toDate = LocalDate.parse(dateTo, formatter);
+//            if (permission.isCanSearchMachines()) {
+//                for (Machines machines : list) {
+//                    if (machines.getDateFrom().isAfter(fromDate) && machines.getDateFrom().isBefore(toDate)) {
+//                        returnList.add(machines);
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (returnList.isEmpty()) {
+//            System.out.println("No machines");
+//            return ResponseEntity.status(403).build();
+//        }
+//        return new ResponseEntity<>(returnList, HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/search/dateFrom")
+//    public ResponseEntity<List<Machines>> searchForMachinesByDateFrom(@RequestParam("dateFrom") String dateFrom) {
+//        List<Machines> returnList = new ArrayList<>();
+//        String username = getContext().getAuthentication().getName();
+//        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
+//        if (userLogedIn.isPresent()) {
+//            List<Machines> list = machineService.findAll();
+//            Permission permission = userLogedIn.get().getPermissions();
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//            LocalDate fromDate = LocalDate.parse(dateFrom, formatter);
+//            if (permission.isCanSearchMachines()) {
+//                for (Machines machines : list) {
+//                    if (machines.getDateFrom().isAfter(fromDate)) {
+//                        returnList.add(machines);
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (returnList.isEmpty()) {
+//            System.out.println("No machines");
+//            return ResponseEntity.status(403).build();
+//        }
+//        return new ResponseEntity<>(returnList, HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/search/dateTo")
+//    public ResponseEntity<List<Machines>> searchForMachinesByDateTo(@RequestParam("dateTo") String dateTo) {
+//        List<Machines> returnList = new ArrayList<>();
+//        String username = getContext().getAuthentication().getName();
+//        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
+//        if (userLogedIn.isPresent()) {
+//            List<Machines> list = machineService.findAll();
+//            Permission permission = userLogedIn.get().getPermissions();
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//            LocalDate toDate = LocalDate.parse(dateTo, formatter);
+//            if (permission.isCanSearchMachines()) {
+//                for (Machines machines : list) {
+//                    if (machines.getDateFrom().isBefore(toDate)) {
+//                        returnList.add(machines);
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (returnList.isEmpty()) {
+//            System.out.println("No machines");
+//            return ResponseEntity.status(403).build();
+//        }
+//        return new ResponseEntity<>(returnList, HttpStatus.OK);
+//    }
 
-        if (returnList.isEmpty()) {
-            System.out.println("No machines");
-            return ResponseEntity.status(403).build();
-        }
-        return new ResponseEntity<>(returnList, HttpStatus.OK);
-    }
-
-    @GetMapping("/search/dateFrom")
-    public ResponseEntity<List<Machines>> searchForMachinesByDateFrom(@RequestParam("dateFrom") String dateFrom) {
-        List<Machines> returnList = new ArrayList<>();
-        String username = getContext().getAuthentication().getName();
-        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
-        if (userLogedIn.isPresent()) {
-            List<Machines> list = machineService.findAll();
-            Permission permission = userLogedIn.get().getPermissions();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate fromDate = LocalDate.parse(dateFrom, formatter);
-            if (permission.isCanSearchMachines()) {
-                for (Machines machines : list) {
-                    if (machines.getDateFrom().isAfter(fromDate)) {
-                        returnList.add(machines);
-                    }
-                }
-            }
-        }
-
-        if (returnList.isEmpty()) {
-            System.out.println("No machines");
-            return ResponseEntity.status(403).build();
-        }
-        return new ResponseEntity<>(returnList, HttpStatus.OK);
-    }
-
-    @GetMapping("/search/dateTo")
-    public ResponseEntity<List<Machines>> searchForMachinesByDateTo(@RequestParam("dateTo") String dateTo) {
-        List<Machines> returnList = new ArrayList<>();
-        String username = getContext().getAuthentication().getName();
-        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
-        if (userLogedIn.isPresent()) {
-            List<Machines> list = machineService.findAll();
-            Permission permission = userLogedIn.get().getPermissions();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate toDate = LocalDate.parse(dateTo, formatter);
-            if (permission.isCanSearchMachines()) {
-                for (Machines machines : list) {
-                    if (machines.getDateFrom().isBefore(toDate)) {
-                        returnList.add(machines);
-                    }
-                }
-            }
-        }
-
-        if (returnList.isEmpty()) {
-            System.out.println("No machines");
-            return ResponseEntity.status(403).build();
-        }
-        return new ResponseEntity<>(returnList, HttpStatus.OK);
-    }
-
-    @GetMapping("/search/status/{status}")
-    public ResponseEntity<List<Machines>> searchForMachinesByStatus(@PathVariable String status) {
-        List<Machines> returnList = new ArrayList<>();
-        String username = getContext().getAuthentication().getName();
-        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
-        if (userLogedIn.isPresent()) {
-            List<Machines> list = machineService.findAll();
-            Permission permission = userLogedIn.get().getPermissions();
-            if (permission.isCanSearchMachines()) {
-                for (Machines machines : list) {
-                    if (status.equals(MachStatus.RUNNING.toString())) {
-                        if (machines.getStatus().equals(MachStatus.RUNNING)) {
-                            returnList.add(machines);
-                        }
-                    } else {
-                        if (machines.getStatus().equals(MachStatus.STOPPED)) {
-                            returnList.add(machines);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (returnList.isEmpty()) {
-            System.out.println("No machines");
-            return ResponseEntity.status(403).build();
-        }
-        return new ResponseEntity<>(returnList, HttpStatus.OK);
-    }
+//    @GetMapping("/search/status/{status}")
+//    public ResponseEntity<List<Machines>> searchForMachinesByStatus(@PathVariable String status) {
+//        List<Machines> returnList = new ArrayList<>();
+//        String username = getContext().getAuthentication().getName();
+//        Optional<User> userLogedIn = Optional.ofNullable(userService.findByEmail(username));
+//        if (userLogedIn.isPresent()) {
+//            List<Machines> list = machineService.findAll();
+//            Permission permission = userLogedIn.get().getPermissions();
+//            if (permission.isCanSearchMachines()) {
+//                for (Machines machines : list) {
+//                    if (status.equals(MachStatus.RUNNING.toString())) {
+//                        if (machines.getStatus().equals(MachStatus.RUNNING)) {
+//                            returnList.add(machines);
+//                        }
+//                    } else {
+//                        if (machines.getStatus().equals(MachStatus.STOPPED)) {
+//                            returnList.add(machines);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (returnList.isEmpty()) {
+//            System.out.println("No machines");
+//            return ResponseEntity.status(403).build();
+//        }
+//        return new ResponseEntity<>(returnList, HttpStatus.OK);
+//    }
 
     @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<?> deleteMachine(@PathVariable Long id, Authentication authentication) {
