@@ -66,7 +66,7 @@ public class MachineService implements IService<Machines, Long>, MachineServiceI
 
     @Override
     public List<Machines> searchByParameters(String name, java.sql.Date dateFrom, java.sql.Date dateTo, List<MachStatus> status, User user) {
-        return machineRepository.findMachinesByParameters(name, dateFrom, dateTo, status, CollectionUtils.isEmpty(status), user);
+        return machineRepository.findMachines(name, dateFrom, dateTo, status, CollectionUtils.isEmpty(status), user);
     }
 
     @Override

@@ -24,7 +24,7 @@ public interface MachineRepository extends JpaRepository<Machines, Long>, JpaSpe
             "(:isStatusEmpty = true or m.status in (:status)) and " +
             "m.user = :createdBy and " +
             "m.active = true")
-    List<Machines> findMachinesByParameters(
+    List<Machines> findMachines(
             @Param("name") String name, @Param("dateFrom") java.sql.Date dateFrom, @Param("dateTo") Date dateTo,
             @Param("status")List<MachStatus> status, @Param("isStatusEmpty") boolean isStatusEmpty, @Param("createdBy") User createdBy);
 

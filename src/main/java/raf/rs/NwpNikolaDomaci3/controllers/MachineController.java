@@ -42,7 +42,6 @@ public class MachineController {
     Calendar c = Calendar.getInstance();
 
 
-
     public MachineController(UserService userService, UserRepository userRepository, MachineService machineService, ErrorMessageService errorService, MachineRepository machineRepository, ErrorMessRepository errorMessRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
@@ -117,8 +116,8 @@ public class MachineController {
     ) {
         System.out.println(dateFrom);
         System.out.println(name);
-        if ((dateFrom != null && dateTo == null) || (dateFrom == null && dateTo != null)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Must have both dates or none");
+        if ((dateFrom == null && dateTo != null) || (dateFrom != null && dateTo == null)) {
+            return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(machineService.searchByParameters(name, dateFrom, dateTo, status, userService.findByEmail(authentication.getName())));
     }
@@ -276,10 +275,9 @@ public class MachineController {
                                             @RequestParam("machineId") Long id,
                                             @RequestParam("operation") MachineOperation operation,
                                             Authentication authentication) {
-//        Permission permission = userService.findByEmail(authentication.getName()).getPermissions();
-//        User currentUser = getCurrentUser();
-        Optional<Machines> optionalMachine = machineService.findById(id);
-        if (optionalMachine.isPresent()) {
+
+        Optional<Machines> machine = machineService.findById(id);
+        if (machine.isPresent()) {
             machineService.schedule(id, scheduledTime, operation, userService.findByEmail(authentication.getName()));
             return ResponseEntity.status(HttpStatus.OK).build();
         }
